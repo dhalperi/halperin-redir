@@ -14,23 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import util
-from datetime import datetime
+from model import Redirection
 import cgi
-
-class Redirection(db.Model):
-	url = db.LinkProperty()
-	added = db.DateTimeProperty(auto_now_add=True)
-	last = db.DateTimeProperty()
-	hitcount = db.IntegerProperty(default=0)
-
-	def update(self):
-		self.hitcount += 1
-		self.last = datetime.now()
-
 
 class AddPage(webapp.RequestHandler):
 	def post(self):
@@ -83,7 +71,7 @@ class AdminPage(webapp.RequestHandler):
 
 		for link in links:
 			delurl = "/admin/del?name=%s" %(link.key().name())
-			msg = "%s -> <a href='%s'>%s</a> : count=%d : added=%s : last=%s" %(link.key().name(), link.url, link.url, link.hitcount, str(link.added), str(link.last))
+			msg = "%s -> <a href='%s' target='#top'>%s</a> : count=%d : added=%s : last=%s" %(link.key().name(), link.url, link.url, link.hitcount, str(link.added), str(link.last))
 			self.response.out.write( "<a href='" + delurl + "'>X</a> " + msg + '<br>\n')
 
 		self.response.out.write('<br>\n')

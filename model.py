@@ -14,28 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from google.appengine.ext import webapp
 from google.appengine.ext import db
-from google.appengine.ext.webapp import util
-from model import Redirection
+from datetime import datetime
 
-class RedirPage(webapp.RequestHandler):
-	def get(self):
-		path = self.request.path
-		path_k = db.Key.from_path('Redirection', path)
-		result = db.get(path_k)
-		if not result:
-			self.response.set_status(404)
-			return
-		result.update()
-		result.put()
-		self.redirect(result.url, permanent=False)
+class Redirection(db.Model):
+	url = db.LinkProperty()
+	added = db.DateTimeProperty(auto_now_add=True)
+	last = db.DateTimeProperty()
+	hitcount = db.IntegerProperty(default=0)
 
-
-def main():
-    application = webapp.WSGIApplication([('/.*', RedirPage)], debug=True)
-    util.run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-    main()
+	def update(self):
+		self.hitcount += 1
+		self.last = datetime.now()
