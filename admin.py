@@ -71,7 +71,7 @@ class AdminPage(webapp.RequestHandler):
 
 		for link in links:
 			delurl = "/admin/del?name=%s" %(link.key().name())
-			msg = "%s -> <a href='%s' target='#top'>%s</a> : count=%d : added=%s : last=%s" %(link.key().name(), link.url, link.url, link.hitcount, str(link.added), str(link.last))
+			msg = "%s &rarr; <a href='%s' target='#top'>%s</a> : count=%d : added=%s : last=%s" %(link.key().name(), link.url, link.url, link.hitcount, str(link.added), str(link.last))
 			self.response.out.write( "<a href='" + delurl + "'>X</a> " + msg + '<br>\n')
 
 		self.response.out.write('<br>\n')
