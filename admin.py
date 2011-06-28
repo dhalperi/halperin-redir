@@ -62,24 +62,34 @@ class DelPage(webapp.RequestHandler):
 
 class AdminPage(webapp.RequestHandler):
 	def get(self):
-		links = db.GqlQuery("SELECT * "
+		sort = self.request.get('sort')
+		if sort in Redirection.properties():
+			links = db.GqlQuery("SELECT * "
 				    "FROM Redirection "
-				    "ORDER BY added")
+				    "ORDER BY %s" %(sort))
+		else:
+			links = db.GqlQuery("SELECT * " "FROM Redirection")
 
 		if links.count(1) == 0:
 			self.response.out.write("No links<BR>\n")
+		else:
+			self.response.out.write("<HTML><HEAD><TITLE>Redirection Administration</TITLE></HEAD><BODY>\n")
+			self.response.out.write("\t<table style='text-align:center;'>\n")
+			self.response.out.write("\t\t<tr><td></td><td><b><a href='/admin'>Mapping</a></b></td><td><b><a href='/admin?sort=hitcount'>Hit Count</a></b></td><td><b><a href='/admin?sort=added'>Added</a></b></td><td><b><a href='/admin?sort=last'>Last</a></b></td></tr>\n")
+			for link in links:
+				delurl = "/admin/del?name=%s" %(link.key().name())
+				msg = "<td>%s &rarr; <a href='%s' target='#top'>%s</a></td><td>%d</td><td>%s</td><td>%s</td>" \
+					%(link.key().name(), link.url, link.url, link.hitcount, str(link.added), str(link.last))
+				self.response.out.write( "\t\t<tr><td><a href='" + delurl + "'>X</a></td> " + msg + '</tr>\n')
+			self.response.out.write("\t</table>\n")
 
-		for link in links:
-			delurl = "/admin/del?name=%s" %(link.key().name())
-			msg = "%s &rarr; <a href='%s' target='#top'>%s</a> : count=%d : added=%s : last=%s" %(link.key().name(), link.url, link.url, link.hitcount, str(link.added), str(link.last))
-			self.response.out.write( "<a href='" + delurl + "'>X</a> " + msg + '<br>\n')
-
-		self.response.out.write('<br>\n')
+		self.response.out.write('\t<br>\n')
 		self.response.out.write("""
-		<form action="/admin/add" method="post">
-			<div>name: <input name="name"> url: <input name="url" value="http://"> <input type="submit"></div>
-		</form>
+	<form action="/admin/add" method="post">
+		<div>name: <input name="name"> url: <input name="url" value="http://"> <input type="submit"></div>
+	</form>
 		""")
+		self.response.out.write("</BODY></HTML>")
 
 def main():
     application = webapp.WSGIApplication([('/admin/*', AdminPage), ('/admin/add', AddPage), ('/admin/del', DelPage)], debug=True)
